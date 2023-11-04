@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 
-class UserSerializer(serializers.ModelSerializer):
-    followers = serializers.SerializerMethodField()
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    id = serializers.HyperlinkedIdentityField(view_name="profile")
 
     class Meta:
         model = get_user_model()
@@ -12,17 +12,12 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "is_staff",
+            "is_superuser",
         )
         read_only_fields = ("is_staff",)
         extra_kwargs = {
             "password": {"write_only": True, "min_length": 5, "required": False}
         }
-
-    @staticmethod
-    def get_followers(obj):
-        """Filter out followers, except current user"""
-        followers = obj.followers.exclude(pk=obj.pk)
-        return [follower.pk for follower in followers]
 
     def create(self, validated_data):
         """Create a new user with encrypted password and return it"""
