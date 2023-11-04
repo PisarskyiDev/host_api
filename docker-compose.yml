@@ -1,0 +1,15 @@
+version: "3" #2
+
+services:
+  host_api:
+    image: host_api:latest
+    container_name: host_api
+    volumes:
+      - static_volume:/host_api/static
+      - media_volume:/host_api/media
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    command: >
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn -b 0.0.0.0:8000 --workers 4 --threads 2 core.wsgi:application"
